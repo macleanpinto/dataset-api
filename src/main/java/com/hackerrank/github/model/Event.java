@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
 @Entity
@@ -13,7 +14,7 @@ public class Event {
     @Id
     private Long id;
     private String type;
-    @OneToOne
+    @ManyToOne
     private Actor actor;
     @OneToOne
     private Repo repo;

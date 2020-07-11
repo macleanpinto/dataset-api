@@ -10,5 +10,7 @@ import com.hackerrank.github.model.Event;
 @Repository
 public interface EventRepository extends CrudRepository<Event, Long> {
 
-    public List<Event> findAllByEventByIdAsc();
+    public List<Event> findAllByIdAsc();
+
+    public List<Event> findAllByActorIdByIdAsc(Long actorID);
 }
