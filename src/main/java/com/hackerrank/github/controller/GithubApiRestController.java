@@ -8,6 +8,7 @@ import com.hackerrank.github.model.Event;
 import com.hackerrank.github.repository.EventRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class GithubApiRestController {
+    public static final Sort SORT_BY_ID = Sort.by(Sort.Direction.ASC, "id");
     @Autowired
     private EventRepository eventRepository;
 
@@ -37,12 +39,12 @@ public class GithubApiRestController {
 
     @GetMapping("/events")
     public ResponseEntity<List<Event>> fetchAllEvents() {
-        return ResponseEntity.status(HttpStatus.OK).body(eventRepository.findAllByIdAsc());
+        return ResponseEntity.status(HttpStatus.OK).body(eventRepository.findAllById(SORT_BY_ID));
     }
 
     @GetMapping("/events/actors/{actorID}")
     public ResponseEntity<List<Event>> fetchAllEventsForActor(@PathParam("actorID") final Long actorID) {
-        List<Event> events = eventRepository.findAllByActorIdByIdAsc(actorID);
+        List<Event> events = eventRepository.findAllByActorId(actorID, SORT_BY_ID);
         if (events.size() > 0) {
             return ResponseEntity.status(HttpStatus.OK).body(events);
         }
