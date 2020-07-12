@@ -2,8 +2,6 @@ package com.hackerrank.github.controller;
 
 import java.util.List;
 
-import javax.websocket.server.PathParam;
-
 import com.hackerrank.github.model.Event;
 import com.hackerrank.github.repository.EventRepository;
 
@@ -13,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,12 +38,12 @@ public class GithubApiRestController {
 
     @GetMapping("/events")
     public ResponseEntity<List<Event>> fetchAllEvents() {
-        return ResponseEntity.status(HttpStatus.OK).body(eventRepository.findAllById(SORT_BY_ID));
+        return ResponseEntity.status(HttpStatus.OK).body(eventRepository.findAll(SORT_BY_ID));
     }
 
     @GetMapping("/events/actors/{actorID}")
-    public ResponseEntity<List<Event>> fetchAllEventsForActor(@PathParam("actorID") final Long actorID) {
-        List<Event> events = eventRepository.findAllByActorId(actorID, SORT_BY_ID);
+    public ResponseEntity<List<Event>> fetchAllEventsForActor(@PathVariable("actorID") final Long actorID) {
+        List<Event> events = eventRepository.findByActorId(actorID, SORT_BY_ID);
         if (events.size() > 0) {
             return ResponseEntity.status(HttpStatus.OK).body(events);
         }

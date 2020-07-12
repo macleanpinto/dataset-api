@@ -1,9 +1,16 @@
 package com.hackerrank.github.model;
 
-public class Actor {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
+@Entity
+public class Actor {
+    @Id
     private Long id;
+    @Column
     private String login;
+    @Column
     private String avatar;
 
     public Actor() {
@@ -14,27 +21,27 @@ public class Actor {
         this.login = login;
         this.avatar = avatar;
     }
-
+    
     public Long getId() {
         return id;
     }
-
+    
     public void setId(Long id) {
         this.id = id;
     }
-
+    
     public String getLogin() {
         return login;
     }
-
+    
     public void setLogin(String login) {
         this.login = login;
     }
-
+    
     public String getAvatar() {
         return avatar;
     }
-
+    
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }

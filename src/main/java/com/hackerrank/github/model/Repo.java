@@ -1,9 +1,17 @@
 package com.hackerrank.github.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class Repo {
- 
+  
+    @Id
     private Long id;
+    @Column
     private String name;
+    @Column
     private String url;
 
     public Repo() {
