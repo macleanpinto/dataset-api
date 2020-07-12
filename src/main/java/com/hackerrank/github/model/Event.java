@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 
 @Entity
 public class Event {
@@ -17,7 +16,7 @@ public class Event {
     private String type;
     @ManyToOne(cascade = CascadeType.ALL)
     private Actor actor;
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Repo repo;
     @Column
     private Timestamp createdAt;
