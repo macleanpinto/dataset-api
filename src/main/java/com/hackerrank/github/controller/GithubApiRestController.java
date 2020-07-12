@@ -87,7 +87,7 @@ public class GithubApiRestController {
 	@ResponseBody
 	public ResponseEntity<List<Actor>> getAllActorsOrderByStreak(HttpServletRequest request) {
 
-		List<Actor> actors = actorRepository.findActorsOrderByMaximumStreakDESC();
+		List<Actor> actors = actorRepository.findActorsOrderByMaximumStreakDESC(3466404L);
 		
 		return new ResponseEntity<List<Actor>>(actors, HttpStatus.OK);	
 	}
