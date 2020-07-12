@@ -16,7 +16,10 @@ public interface ActorRepository extends CrudRepository<Actor, Long> {
 
     public Optional<Actor> findById(Long id);
 
-    @Query(value = "SELECT * FROM ACTOR a JOIN EVENT e GROUP BY e.id ORDER BY count(e.id) ASC", nativeQuery = true)
-    List<Actor> findAllOrderByCountOfEvents();
+    @Query("SELECT a from Actor a JOIN Event e ON a.id=e.actor.id GROUP BY e.actor.id ORDER BY count(e.actor.id),e.createdAt,e.actor.login DESC")
+    List<Actor> findActorsOrderByNumberEventsDESC();
+
+    @Query("SELECT a FROM Actor a")
+	List<Actor> findActorsOrderByMaximumStreakDESC();
 
 }

@@ -1,13 +1,10 @@
 package com.hackerrank.github.model;
 
-import static javax.persistence.CascadeType.PERSIST;
-
-import java.util.Set;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 public class Actor {
@@ -16,19 +13,16 @@ public class Actor {
     @Column
     private String login;
     @Column
+    @JsonProperty("avatar_url")
     private String avatar;
-
-    @OneToMany(cascade = PERSIST, mappedBy = "actor")
-    private Set<Event> events;
 
     public Actor() {
     }
 
-    public Actor(final Long id, final String login, final String avatar, final Set<Event> events) {
+    public Actor(final Long id, final String login, final String avatar) {
         this.id = id;
         this.login = login;
         this.avatar = avatar;
-        this.events = events;
     }
 
     public Long getId() {
@@ -55,11 +49,4 @@ public class Actor {
         this.avatar = avatar;
     }
 
-    public Set<Event> getEvents() {
-        return events;
-    }
-
-    public void setEvents(final Set<Event> events) {
-        this.events = events;
-    }
 }

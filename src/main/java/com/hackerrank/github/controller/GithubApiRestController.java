@@ -1,7 +1,10 @@
+
 package com.hackerrank.github.controller;
 
 import java.util.List;
 import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
 
 import com.hackerrank.github.model.Actor;
 import com.hackerrank.github.model.Event;
@@ -18,6 +21,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -74,6 +80,15 @@ public class GithubApiRestController {
 
     @GetMapping("/actors")
     public ResponseEntity<List<Actor>> allActors(){
-       return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findAllOrderByCountOfEvents());
+       return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findActorsOrderByNumberEventsDESC());
     }
+
+    @RequestMapping(value = "/actors/streak", method = RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<List<Actor>> getAllActorsOrderByStreak(HttpServletRequest request) {
+
+		List<Actor> actors = actorRepository.findActorsOrderByMaximumStreakDESC();
+		
+		return new ResponseEntity<List<Actor>>(actors, HttpStatus.OK);	
+	}
 }
