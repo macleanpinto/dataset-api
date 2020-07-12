@@ -61,6 +61,7 @@ public class GithubApiRestController {
         final Optional<Actor> oldEntry = actorRepository.findById(actor.getId());
         if (!oldEntry.isEmpty()) {
             if (oldEntry.get().getLogin().equals(actor.getLogin())) {
+
                 actorRepository.save(actor);
                 return ResponseEntity.status(HttpStatus.OK).build();
             } else {
@@ -73,6 +74,6 @@ public class GithubApiRestController {
 
     @GetMapping("/actors")
     public ResponseEntity<List<Actor>> allActors(){
-       return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findAll(SORT_BY_ID));
+       return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findAllOrderByCountOfEvents());
     }
 }
