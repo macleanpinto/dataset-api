@@ -1,13 +1,21 @@
 
 package com.hackerrank.github.controller;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.hackerrank.github.controller.dto.ActorDTO;
 import com.hackerrank.github.model.Actor;
 import com.hackerrank.github.model.Event;
 import com.hackerrank.github.repository.ActorRepository;
@@ -80,9 +88,29 @@ public class GithubApiRestController {
         }
     }
 
-    @GetMapping("/actors")
+    @GetMapping("/actors1")
     public ResponseEntity<List<Actor>> allActors() {
         return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findActorsOrderByNumberEventsDESC());
+    }
+
+    @GetMapping(value = "/actors", produces = "application/json")
+    public ResponseEntity<List<ActorDTO>> getActors() {
+        List<Event> events = (List<Event>) eventRepository.findAll();
+        List<Actor> actors = (List<Actor>) actorRepository.findAll();
+
+        List<ActorTuple> actorTuples = new ArrayList<>();
+
+        for (Actor actor : actors) {
+            List<Event> collect = events.stream().filter(event -> event.getActor().equals(actor))
+                    .sorted(Comparator.comparing(Event::getCreatedAt).reversed()).collect(Collectors.toList());
+            if (!collect.isEmpty()) {
+                actorTuples.add(new ActorTuple(actor, collect.size(), collect.get(0).getCreatedAt()));
+            }
+        }
+
+        List<ActorDTO> actorList = getCollectionWithCriteria(actorTuples);
+
+        return ResponseEntity.ok(actorList);
     }
 
     @RequestMapping(value = "/actors/streak1", method = RequestMethod.GET)
@@ -103,16 +131,15 @@ public class GithubApiRestController {
 
     @GetMapping(value = "/actors/streak", produces = "application/json")
     public ResponseEntity<List<ActorDTO>> getActorsStreak() {
-        List<Event> events = eventRepository.findAll();
-        List<Actor> actors = actorRepository.findAll();
+        List<Event> events = (List<Event>) eventRepository.findAll();
+        List<Actor> actors = (List<Actor>) actorRepository.findAll();
 
         List<ActorTuple> actorTupleStreaks = new ArrayList<>();
 
         for (Actor actor : actors) {
             List<Event> collect = events.stream()
                     .filter(event -> event.getActor().equals(actor) && event.getType().equals("PushEvent"))
-                    .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
-                    .collect(Collectors.toList());
+                    .sorted(Comparator.comparing(Event::getCreatedAt).reversed()).collect(Collectors.toList());
 
             if (!collect.isEmpty()) {
                 if (collect.size() == 1) {
@@ -150,5 +177,10 @@ public class GithubApiRestController {
         return mayorStreak;
     }
 
-    
+    private List<ActorDTO> getCollectionWithCriteria(List<ActorTuple> actorTuples) {
+        return actorTuples.stream().sorted(Comparator.comparing(o -> o.getActor().getLogin()))
+                .sorted(Comparator.comparing(ActorTuple::getLast).reversed())
+                .sorted(Comparator.comparing(ActorTuple::getCEvents).reversed()).map(ActorTuple::getActor)
+                .map(ActorDTO::convertFrom).collect(Collectors.toList());
+    }
 }
