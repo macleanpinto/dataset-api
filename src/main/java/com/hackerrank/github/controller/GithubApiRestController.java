@@ -87,29 +87,9 @@ public class GithubApiRestController {
         }
     }
 
-    @GetMapping("/actors1")
+    @GetMapping("/actors")
     public ResponseEntity<List<Actor>> allActors() {
         return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findActorsOrderByNumberEventsDESC());
-    }
-
-    @GetMapping(value = "/actors", produces = "application/json")
-    public ResponseEntity<List<Actor>> getActors() {
-        List<Event> events = (List<Event>) eventRepository.findAll();
-        List<Actor> actors = (List<Actor>) actorRepository.findAll();
-
-        List<ActorTuple> actorTuples = new ArrayList<>();
-
-        for (Actor actor : actors) {
-            List<Event> collect = events.stream().filter(event -> event.getActor().equals(actor))
-                    .sorted(Comparator.comparing(Event::getCreatedAt).reversed()).collect(Collectors.toList());
-            if (!collect.isEmpty()) {
-                actorTuples.add(new ActorTuple(actor, collect.size(), collect.get(0).getCreatedAt()));
-            }
-        }
-
-        List<Actor> actorList = getCollectionWithCriteria(actorTuples);
-
-        return ResponseEntity.ok(actorList);
     }
 
     @RequestMapping(value = "/actors/streak1", method = RequestMethod.GET)
