@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.hackerrank.github.controller.dto.ActorDTO;
 import com.hackerrank.github.model.Actor;
 import com.hackerrank.github.model.Event;
 import com.hackerrank.github.repository.ActorRepository;
@@ -75,7 +74,7 @@ public class GithubApiRestController {
     @PutMapping("/actors")
     public ResponseEntity<HttpStatus> updateActorAvatar(@RequestBody final Actor actor) {
         final Optional<Actor> oldEntry = actorRepository.findById(actor.getId());
-        if (!oldEntry.isEmpty()) {
+        if (oldEntry.isPresent()) {
             if (oldEntry.get().getLogin().equals(actor.getLogin())) {
 
                 actorRepository.save(actor);
@@ -94,7 +93,7 @@ public class GithubApiRestController {
     }
 
     @GetMapping(value = "/actors", produces = "application/json")
-    public ResponseEntity<List<ActorDTO>> getActors() {
+    public ResponseEntity<List<Actor>> getActors() {
         List<Event> events = (List<Event>) eventRepository.findAll();
         List<Actor> actors = (List<Actor>) actorRepository.findAll();
 
@@ -108,7 +107,7 @@ public class GithubApiRestController {
             }
         }
 
-        List<ActorDTO> actorList = getCollectionWithCriteria(actorTuples);
+        List<Actor> actorList = getCollectionWithCriteria(actorTuples);
 
         return ResponseEntity.ok(actorList);
     }
@@ -130,7 +129,7 @@ public class GithubApiRestController {
     }
 
     @GetMapping(value = "/actors/streak", produces = "application/json")
-    public ResponseEntity<List<ActorDTO>> getActorsStreak() {
+    public ResponseEntity<List<Actor>> getActorsStreak() {
         List<Event> events = (List<Event>) eventRepository.findAll();
         List<Actor> actors = (List<Actor>) actorRepository.findAll();
 
@@ -150,7 +149,7 @@ public class GithubApiRestController {
                 }
             }
         }
-        List<ActorDTO> actorList = getCollectionWithCriteria(actorTupleStreaks);
+        List<Actor> actorList = getCollectionWithCriteria(actorTupleStreaks);
         return ResponseEntity.ok(actorList);
     }
 
@@ -177,10 +176,10 @@ public class GithubApiRestController {
         return mayorStreak;
     }
 
-    private List<ActorDTO> getCollectionWithCriteria(List<ActorTuple> actorTuples) {
+    private List<Actor> getCollectionWithCriteria(List<ActorTuple> actorTuples) {
         return actorTuples.stream().sorted(Comparator.comparing(o -> o.getActor().getLogin()))
                 .sorted(Comparator.comparing(ActorTuple::getLast).reversed())
                 .sorted(Comparator.comparing(ActorTuple::getCEvents).reversed()).map(ActorTuple::getActor)
-                .map(ActorDTO::convertFrom).collect(Collectors.toList());
+                .collect(Collectors.toList());
     }
 }
