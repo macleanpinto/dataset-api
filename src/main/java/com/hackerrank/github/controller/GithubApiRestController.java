@@ -92,22 +92,6 @@ public class GithubApiRestController {
         return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findActorsOrderByNumberEventsDESC());
     }
 
-    @RequestMapping(value = "/actors/streak1", method = RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity<List<Actor>> getAllActorsOrderByStreak(HttpServletRequest request) {
-        Map<Integer, Actor> treeMap = new TreeMap<Integer, Actor>();
-        List<Actor> actors = (List<Actor>) actorRepository.findAll();
-        for (Actor actor : actors) {
-            Integer streak = actorRepository.findActorsMaximumStreak(actor.getId());
-            treeMap.put(streak, actor);
-        }
-        actors.clear();
-        for (Actor actor : treeMap.values()) {
-            actors.add(actor);
-        }
-        return new ResponseEntity<List<Actor>>(actors, HttpStatus.OK);
-    }
-
     @GetMapping(value = "/actors/streak", produces = "application/json")
     public ResponseEntity<List<Actor>> getActorsStreak() {
         List<Event> events = (List<Event>) eventRepository.findAll();
@@ -124,8 +108,8 @@ public class GithubApiRestController {
                 if (collect.size() == 1) {
                     actorTupleStreaks.add(new ActorTuple(actor, 0, collect.get(0).getCreatedAt()));
                 } else {
-                    Integer mayorStreak = getStreak(collect);
-                    actorTupleStreaks.add(new ActorTuple(actor, mayorStreak, collect.get(0).getCreatedAt()));
+                    Integer maxStreak = getStreak(collect);
+                    actorTupleStreaks.add(new ActorTuple(actor, maxStreak, collect.get(0).getCreatedAt()));
                 }
             }
         }
@@ -134,7 +118,7 @@ public class GithubApiRestController {
     }
 
     private int getStreak(List<Event> collect) {
-        int mayorStreak = 0;
+        int maxStreak = 0;
         int streak = 0;
         for (int i = collect.size() - 1; i > 0; i--) {
             LocalDateTime currentDate = collect.get(i).getCreatedAt().toLocalDateTime();
@@ -149,11 +133,11 @@ public class GithubApiRestController {
                 streak = 0;
             } else if (hours - hoursFinalDay <= 24) {
                 streak++;
-                if (streak > mayorStreak)
-                    mayorStreak = streak;
+                if (streak > maxStreak)
+                    maxStreak = streak;
             }
         }
-        return mayorStreak;
+        return maxStreak;
     }
 
     private List<Actor> getCollectionWithCriteria(List<ActorTuple> actorTuples) {
