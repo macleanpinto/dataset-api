@@ -171,7 +171,7 @@ public class HttpJsonDynamicUnitTest {
                         new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
                                 .lines()
                                 .collect(toList())
-                                .forEach(jsonString -> System.out.println(jsonString));
+                                .forEach(jsonString -> jsonStrings.add(jsonString));
                     } catch (IOException ex) {
                         System.out.println(String.join("\n", Stream.of(ex.getStackTrace())
                         .map(trace -> trace.toString())
