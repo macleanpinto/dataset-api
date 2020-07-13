@@ -2,7 +2,9 @@
 package com.hackerrank.github.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -79,16 +81,74 @@ public class GithubApiRestController {
     }
 
     @GetMapping("/actors")
-    public ResponseEntity<List<Actor>> allActors(){
-       return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findActorsOrderByNumberEventsDESC());
+    public ResponseEntity<List<Actor>> allActors() {
+        return ResponseEntity.status(HttpStatus.OK).body(actorRepository.findActorsOrderByNumberEventsDESC());
     }
 
-    @RequestMapping(value = "/actors/streak", method = RequestMethod.GET)
-	@ResponseBody
-	public ResponseEntity<List<Actor>> getAllActorsOrderByStreak(HttpServletRequest request) {
+    @RequestMapping(value = "/actors/streak1", method = RequestMethod.GET)
+    @ResponseBody
+    public ResponseEntity<List<Actor>> getAllActorsOrderByStreak(HttpServletRequest request) {
+        Map<Integer, Actor> treeMap = new TreeMap<Integer, Actor>();
+        List<Actor> actors = (List<Actor>) actorRepository.findAll();
+        for (Actor actor : actors) {
+            Integer streak = actorRepository.findActorsMaximumStreak(actor.getId());
+            treeMap.put(streak, actor);
+        }
+        actors.clear();
+        for (Actor actor : treeMap.values()) {
+            actors.add(actor);
+        }
+        return new ResponseEntity<List<Actor>>(actors, HttpStatus.OK);
+    }
 
-		List<Actor> actors = actorRepository.findActorsOrderByMaximumStreakDESC(3466404L);
-		
-		return new ResponseEntity<List<Actor>>(actors, HttpStatus.OK);	
-	}
+    @GetMapping(value = "/actors/streak", produces = "application/json")
+    public ResponseEntity<List<ActorDTO>> getActorsStreak() {
+        List<Event> events = eventRepository.findAll();
+        List<Actor> actors = actorRepository.findAll();
+
+        List<ActorTuple> actorTupleStreaks = new ArrayList<>();
+
+        for (Actor actor : actors) {
+            List<Event> collect = events.stream()
+                    .filter(event -> event.getActor().equals(actor) && event.getType().equals("PushEvent"))
+                    .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
+                    .collect(Collectors.toList());
+
+            if (!collect.isEmpty()) {
+                if (collect.size() == 1) {
+                    actorTupleStreaks.add(new ActorTuple(actor, 0, collect.get(0).getCreatedAt()));
+                } else {
+                    Integer mayorStreak = getStreak(collect);
+                    actorTupleStreaks.add(new ActorTuple(actor, mayorStreak, collect.get(0).getCreatedAt()));
+                }
+            }
+        }
+        List<ActorDTO> actorList = getCollectionWithCriteria(actorTupleStreaks);
+        return ResponseEntity.ok(actorList);
+    }
+
+    private int getStreak(List<Event> collect) {
+        int mayorStreak = 0;
+        int streak = 0;
+        for (int i = collect.size() - 1; i > 0; i--) {
+            LocalDateTime currentDate = collect.get(i).getCreatedAt().toLocalDateTime();
+            LocalDateTime nextDate = collect.get(i - 1).getCreatedAt().toLocalDateTime();
+            LocalDateTime currentDateEndOfDay = currentDate.with(ChronoField.NANO_OF_DAY, LocalTime.MAX.toNanoOfDay());
+
+            long hours = ChronoUnit.HOURS.between(currentDate, nextDate);
+            long hoursFinalDay = ChronoUnit.HOURS.between(currentDate, currentDateEndOfDay);
+            long days = ChronoUnit.DAYS.between(currentDate, nextDate);
+
+            if (currentDate.getDayOfMonth() == nextDate.getDayOfMonth() || days > 1) {
+                streak = 0;
+            } else if (hours - hoursFinalDay <= 24) {
+                streak++;
+                if (streak > mayorStreak)
+                    mayorStreak = streak;
+            }
+        }
+        return mayorStreak;
+    }
+
+    
 }
